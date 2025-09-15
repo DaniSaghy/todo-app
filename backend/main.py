@@ -2,12 +2,20 @@ from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import create_engine, Column, Integer, String, Boolean, DateTime
 from sqlalchemy.orm import sessionmaker, Session, declarative_base
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from datetime import datetime
 from typing import List, Optional
+import logging
+import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
+
+from ai_service import ai_service, TodoGenerationRequest, TodoGenerationResult
 
 # Database setup
-SQLALCHEMY_DATABASE_URL = "sqlite:///./todos.db"
+SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./todos.db")
 engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False})
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
@@ -44,7 +52,11 @@ class TodoResponse(BaseModel):
     created_at: datetime
     updated_at: Optional[datetime]
     
-    model_config = {"from_attributes": True}
+    model_config = ConfigDict(from_attributes=True)
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # FastAPI app
 app = FastAPI(title="Todo API", version="1.0.0")
@@ -115,6 +127,54 @@ async def delete_todo(todo_id: int, db: Session = Depends(get_db)):
     db.delete(todo)
     db.commit()
     return {"message": "Todo deleted successfully"}
+
+# AI-powered todo generation endpoint
+@app.post("/todos/ai-generate")
+async def generate_todo_with_ai(request: TodoGenerationRequest):
+    """
+    Generate a todo from natural language input using AI
+    
+    This endpoint converts natural language requests into structured todo items
+    with proper error handling and fallback mechanisms.
+    """
+    try:
+        logger.info(f"AI todo generation request: {request.user_input[:100]}...")
+        
+        # Generate todo using AI service
+        result = await ai_service.generate_todo(request)
+        
+        if result.success:
+            return {
+                "success": True,
+                "title": result.title,
+                "description": result.description,
+                "fallback_used": result.fallback_used,
+                "provider_used": result.provider_used
+            }
+        else:
+            # Return error response
+            raise HTTPException(
+                status_code=500,
+                detail={
+                    "success": False,
+                    "error": result.error_message,
+                    "fallback_available": True
+                }
+            )
+            
+    except HTTPException:
+        # Re-raise HTTP exceptions
+        raise
+    except Exception as e:
+        logger.error(f"Unexpected error in AI todo generation: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "success": False,
+                "error": "An unexpected error occurred while generating the todo",
+                "fallback_available": True
+            }
+        )
 
 if __name__ == "__main__":
     import uvicorn

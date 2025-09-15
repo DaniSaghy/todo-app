@@ -1,9 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Plus } from 'lucide-react';
+import { Plus, Bot } from 'lucide-react';
 import TodoItem from '@/components/TodoItem';
 import TodoForm from '@/components/TodoForm';
+import AITodoChat from '@/components/AITodoChat';
 
 export interface Todo {
   id: number;
@@ -32,6 +33,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [editingTodo, setEditingTodo] = useState<Todo | null>(null);
   const [showForm, setShowForm] = useState(false);
+  const [showAIChat, setShowAIChat] = useState(false);
 
   // Fetch todos from API
   const fetchTodos = async () => {
@@ -131,14 +133,30 @@ export default function Home() {
         <div className="bg-white rounded-lg shadow-md p-6">
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-3xl font-bold text-gray-800">Todo App</h1>
-            <button
-              onClick={() => setShowForm(true)}
-              className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
-            >
-              <Plus size={20} />
-              Add Todo
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setShowAIChat(true)}
+                className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-all duration-200 shadow-md hover:shadow-lg"
+              >
+                <Bot size={20} />
+                Create with AI
+              </button>
+              <button
+                onClick={() => setShowForm(true)}
+                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
+              >
+                <Plus size={20} />
+                Add Todo
+              </button>
+            </div>
           </div>
+
+          {showAIChat && (
+            <AITodoChat
+              onSubmit={createTodo}
+              onCancel={() => setShowAIChat(false)}
+            />
+          )}
 
           {showForm && (
             <div className="mb-6">
