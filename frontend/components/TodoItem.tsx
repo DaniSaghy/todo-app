@@ -56,9 +56,12 @@ export default function TodoItem({ todo, onEdit, onDelete, onToggle }: TodoItemP
               {todo.description}
             </p>
           )}
-          <p className="text-xs text-gray-400 mt-2">
-            Created: {new Date(todo.created_at).toLocaleDateString()}
-          </p>
+          <div className="text-xs text-gray-400 mt-2 flex gap-4">
+            <span>Created: {new Date(todo.created_at).toLocaleDateString()}</span>
+            {todo.updated_at && (
+              <span>Updated: {new Date(todo.updated_at).toLocaleDateString()}</span>
+            )}
+          </div>
         </div>
         
         <div className="flex gap-2">

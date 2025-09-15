@@ -21,7 +21,7 @@ class Todo(Base):
     description = Column(String, nullable=True)
     completed = Column(Boolean, default=False)
     created_at = Column(DateTime, default=datetime.now)
-    updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
+    updated_at = Column(DateTime, nullable=True, onupdate=datetime.now)
 
 # Create tables
 Base.metadata.create_all(bind=engine)
@@ -42,7 +42,7 @@ class TodoResponse(BaseModel):
     description: Optional[str]
     completed: bool
     created_at: datetime
-    updated_at: datetime
+    updated_at: Optional[datetime]
     
     model_config = {"from_attributes": True}
 
@@ -73,7 +73,7 @@ async def root():
 
 @app.get("/todos", response_model=List[TodoResponse])
 async def get_todos(db: Session = Depends(get_db)):
-    todos = db.query(Todo).all()
+    todos = db.query(Todo).order_by(Todo.created_at.desc()).all()
     return todos
 
 @app.post("/todos", response_model=TodoResponse)

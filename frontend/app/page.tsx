@@ -11,7 +11,7 @@ export interface Todo {
   description?: string;
   completed: boolean;
   created_at: string;
-  updated_at: string;
+  updated_at?: string;
 }
 
 export interface TodoCreate {
@@ -61,7 +61,7 @@ export default function Home() {
       
       if (response.ok) {
         const newTodo = await response.json();
-        setTodos([...todos, newTodo]);
+        setTodos([newTodo, ...todos]);
         setShowForm(false);
       }
     } catch (error) {
