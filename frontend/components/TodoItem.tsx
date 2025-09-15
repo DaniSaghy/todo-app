@@ -26,58 +26,64 @@ export default function TodoItem({ todo, onEdit, onDelete, onToggle }: TodoItemP
   };
 
   return (
-    <div className={`border rounded-lg p-4 transition-all ${
+    <div className={`glass-effect rounded-lg p-3 transition-all duration-200 ${
       todo.completed 
-        ? 'bg-gray-50 border-gray-200' 
-        : 'bg-white border-gray-300 hover:border-gray-400'
+        ? 'opacity-60' 
+        : 'hover:shadow-agent hover:border-agent-orange'
     }`}>
       <div className="flex items-start gap-3">
         <button
           onClick={handleToggle}
-          className={`mt-1 w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
+          className={`mt-0.5 w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all duration-200 ${
             todo.completed
-              ? 'bg-green-500 border-green-500 text-white'
-              : 'border-gray-300 hover:border-green-500'
+              ? 'bg-agent-success border-agent-success text-white shadow-agent'
+              : 'border-agent-gray-lighter hover:border-agent-orange hover:shadow-agent-orange'
           }`}
         >
           {todo.completed && <Check size={12} />}
         </button>
         
         <div className="flex-1 min-w-0">
-          <h3 className={`font-medium ${
-            todo.completed ? 'text-gray-500 line-through' : 'text-gray-800'
+          <h3 className={`font-medium text-base ${
+            todo.completed ? 'text-agent-text-muted line-through' : 'text-agent-text'
           }`}>
             {todo.title}
           </h3>
           {todo.description && (
             <p className={`text-sm mt-1 ${
-              todo.completed ? 'text-gray-400 line-through' : 'text-gray-600'
+              todo.completed ? 'text-agent-text-muted line-through' : 'text-agent-text-secondary'
             }`}>
               {todo.description}
             </p>
           )}
-          <div className="text-xs text-gray-400 mt-2 flex gap-4">
-            <span>Created: {new Date(todo.created_at).toLocaleDateString()}</span>
+          <div className="text-xs text-agent-text-muted mt-2 flex gap-4">
+            <span className="flex items-center gap-1">
+              <div className="w-1.5 h-1.5 bg-agent-orange rounded-full"></div>
+              Created: {new Date(todo.created_at).toLocaleDateString()}
+            </span>
             {todo.updated_at && (
-              <span>Updated: {new Date(todo.updated_at).toLocaleDateString()}</span>
+              <span className="flex items-center gap-1">
+                <div className="w-1.5 h-1.5 bg-agent-accent rounded-full"></div>
+                Updated: {new Date(todo.updated_at).toLocaleDateString()}
+              </span>
             )}
           </div>
         </div>
         
-        <div className="flex gap-2">
+        <div className="flex gap-1">
           <button
             onClick={handleEdit}
-            className="p-2 text-gray-500 hover:text-blue-500 transition-colors"
-            title="Edit todo"
+            className="p-2 text-agent-text-muted hover:text-agent-orange hover:bg-agent-gray-light rounded-md transition-all duration-200"
+            title="Edit task"
           >
-            <Edit2 size={16} />
+            <Edit2 size={14} />
           </button>
           <button
             onClick={handleDelete}
-            className="p-2 text-gray-500 hover:text-red-500 transition-colors"
-            title="Delete todo"
+            className="p-2 text-agent-text-muted hover:text-agent-error hover:bg-agent-gray-light rounded-md transition-all duration-200"
+            title="Delete task"
           >
-            <Trash2 size={16} />
+            <Trash2 size={14} />
           </button>
         </div>
       </div>

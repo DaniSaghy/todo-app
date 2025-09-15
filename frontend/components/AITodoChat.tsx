@@ -29,9 +29,7 @@ export default function AITodoChat({ onSubmit, onCancel }: AITodoChatProps) {
   const examplePrompts = [
     "remind me to submit taxes next Monday at noon",
     "buy groceries for the weekend",
-    "call mom this weekend",
-    "schedule dentist appointment",
-    "prepare presentation"
+    "call mom this weekend"
   ];
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -82,33 +80,37 @@ export default function AITodoChat({ onSubmit, onCancel }: AITodoChatProps) {
   };
 
   return (
-    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-6 mb-6">
+    <div className="bg-agent-card-gradient border border-agent-gray-lighter rounded-xl p-4 mb-4 shadow-agent">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <Bot className="h-6 w-6 text-blue-600" />
-          <h3 className="text-lg font-semibold text-gray-800">Create with AI</h3>
+          <div className="w-8 h-8 bg-agent-orange-gradient rounded-lg flex items-center justify-center">
+            <Bot className="h-5 w-5 text-white" />
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold text-agent-text">AI Task Creator</h3>
+          </div>
         </div>
         <button
           onClick={onCancel}
-          className="text-gray-500 hover:text-gray-700 transition-colors"
+          className="p-2 text-agent-text-muted hover:text-agent-text hover:bg-agent-gray-light rounded-lg transition-all duration-200"
         >
           <X size={20} />
         </button>
       </div>
 
-      <p className="text-sm text-gray-600 mb-4">
-        Describe what you need to do in natural language.
+      <p className="text-agent-text-secondary mb-3 text-sm">
+        Describe what you need to do in natural language and let our AI agents create the perfect task for you.
       </p>
 
       {/* Example prompts */}
       <div className="mb-4">
-        <p className="text-xs text-gray-500 mb-2">Try these examples:</p>
-        <div className="flex flex-wrap gap-2">
+        <p className="text-xs text-agent-text-secondary mb-2 font-medium">Try these examples:</p>
+        <div className="flex flex-wrap gap-1">
           {examplePrompts.map((example, index) => (
             <button
               key={index}
               onClick={() => handleExampleClick(example)}
-              className="text-xs bg-blue-100 hover:bg-blue-200 text-blue-700 px-2 py-1 rounded-full transition-colors"
+              className="text-xs bg-agent-gray-light hover:bg-agent-gray-lighter text-agent-text-secondary hover:text-agent-text px-3 py-1 rounded-md transition-all duration-200 border border-agent-gray-lighter hover:border-agent-orange"
             >
               {example}
             </button>
@@ -121,15 +123,15 @@ export default function AITodoChat({ onSubmit, onCancel }: AITodoChatProps) {
           <textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Describe your todo in natural language..."
-            className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+            placeholder="Describe your task in natural language..."
+            className="w-full px-3 py-3 pr-12 bg-agent-gray-light border border-agent-gray-lighter rounded-lg text-agent-text placeholder-agent-text-muted focus:outline-none focus:ring-2 focus:ring-agent-orange focus:border-transparent resize-none transition-all duration-200"
             rows={3}
             disabled={isLoading}
           />
           <button
             type="submit"
             disabled={!input.trim() || isLoading}
-            className="absolute right-2 top-2 p-2 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 text-white rounded-lg transition-colors"
+            className="absolute right-2 top-2 p-1.5 bg-agent-orange-gradient hover:shadow-agent-orange disabled:bg-agent-gray-lighter text-white rounded-md transition-all duration-200 shadow-agent"
           >
             {isLoading ? (
               <Loader2 size={16} className="animate-spin" />
@@ -140,35 +142,43 @@ export default function AITodoChat({ onSubmit, onCancel }: AITodoChatProps) {
         </div>
 
         {error && (
-          <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-lg">
-            <AlertCircle size={16} className="text-red-500" />
-            <span className="text-sm text-red-700">{error}</span>
+          <div className="flex items-center gap-2 p-3 bg-agent-error/10 border border-agent-error/20 rounded-lg">
+            <AlertCircle size={16} className="text-agent-error" />
+            <span className="text-sm text-agent-error font-medium">{error}</span>
           </div>
         )}
 
         {lastResponse && (
-          <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+          <div className="p-3 bg-agent-success/10 border border-agent-success/20 rounded-lg">
             <div className="flex items-center gap-2 mb-2">
-              <Bot size={16} className="text-green-600" />
-              <span className="text-sm font-medium text-green-800">AI Generated:</span>
+              <div className="w-6 h-6 bg-agent-success rounded-md flex items-center justify-center">
+                <Bot size={14} className="text-white" />
+              </div>
+              <span className="text-sm font-semibold text-agent-success">AI Generated Task:</span>
               {lastResponse.fallback_used && (
-                <span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-1 rounded-full">
-                  Fallback
+                <span className="text-xs bg-agent-warning/20 text-agent-warning px-2 py-0.5 rounded-full font-medium">
+                  Fallback Mode
                 </span>
               )}
             </div>
-            <div className="text-sm text-green-700">
-              <div className="font-medium">{lastResponse.title}</div>
+            <div className="text-sm text-agent-text">
+              <div className="font-semibold text-agent-text mb-1">{lastResponse.title}</div>
               {lastResponse.description && (
-                <div className="text-gray-600 mt-1">{lastResponse.description}</div>
+                <div className="text-agent-text-secondary">{lastResponse.description}</div>
               )}
             </div>
           </div>
         )}
       </form>
 
-      <div className="mt-4 text-xs text-gray-500">
-        <p>💡 Tip: Be specific about timing, context, or details for better results</p>
+      <div className="mt-4 p-3 bg-agent-gray-light rounded-lg border border-agent-gray-lighter">
+        <div className="flex items-center gap-2 mb-1">
+          <div className="w-1.5 h-1.5 bg-agent-orange rounded-full"></div>
+          <span className="text-sm font-semibold text-agent-text">Pro Tip</span>
+        </div>
+        <p className="text-xs text-agent-text-secondary">
+          For better AI results, give specific timing, context, and details.
+        </p>
       </div>
     </div>
   );

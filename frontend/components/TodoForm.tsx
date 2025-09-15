@@ -29,29 +29,29 @@ export default function TodoForm({ initialData, onSubmit, onCancel }: TodoFormPr
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
-          Title *
+        <label htmlFor="title" className="block text-sm font-semibold text-agent-text mb-1">
+          Task Title *
         </label>
         <input
           id="title"
           type="text"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          placeholder="Enter todo title..."
+          className="w-full px-3 py-2 bg-agent-gray-light border border-agent-gray-lighter rounded-lg text-agent-text placeholder-agent-text-muted focus:outline-none focus:ring-2 focus:ring-agent-orange focus:border-transparent transition-all duration-200"
+          placeholder="Enter task title..."
           required
         />
       </div>
       
       <div>
-        <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="description" className="block text-sm font-semibold text-agent-text mb-1">
           Description
         </label>
         <textarea
           id="description"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-3 py-2 bg-agent-gray-light border border-agent-gray-lighter rounded-lg text-agent-text placeholder-agent-text-muted focus:outline-none focus:ring-2 focus:ring-agent-orange focus:border-transparent transition-all duration-200 resize-none"
           placeholder="Enter description (optional)..."
           rows={3}
         />
@@ -60,15 +60,15 @@ export default function TodoForm({ initialData, onSubmit, onCancel }: TodoFormPr
       <div className="flex gap-2">
         <button
           type="submit"
-          className="flex-1 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 transition-colors"
+          className="flex-1 bg-agent-orange-gradient hover:shadow-agent-orange text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 text-sm font-medium transition-all duration-200 shadow-agent"
         >
           <Check size={16} />
-          Save
+          Save Task
         </button>
         <button
           type="button"
           onClick={onCancel}
-          className="flex-1 bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 transition-colors"
+          className="flex-1 bg-agent-gray-light hover:bg-agent-gray-lighter text-agent-text px-4 py-2 rounded-lg flex items-center justify-center gap-2 text-sm font-medium transition-all duration-200 border border-agent-gray-lighter"
         >
           <X size={16} />
           Cancel

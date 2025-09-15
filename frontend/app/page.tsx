@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Plus, Bot } from 'lucide-react';
+import { Plus, Bot, X } from 'lucide-react';
 import TodoItem from '@/components/TodoItem';
 import TodoForm from '@/components/TodoForm';
 import AITodoChat from '@/components/AITodoChat';
@@ -121,32 +121,42 @@ export default function Home() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-xl">Loading...</div>
+      <div className="min-h-screen flex items-center justify-center bg-agent-gradient">
+        <div className="text-agent-text text-xl font-medium">Loading...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-2xl mx-auto px-4">
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <div className="flex justify-between items-center mb-6">
-            <h1 className="text-3xl font-bold text-gray-800">Todo App</h1>
+    <div className="min-h-screen bg-agent-gradient py-4">
+      <div className="max-w-4xl mx-auto px-4">
+        {/* Header Section */}
+        <div className="text-center mb-4">
+          <h1 className="text-3xl font-bold text-gradient mb-1">Agent Todo</h1>
+          <p className="text-agent-text-secondary text-sm">AI-Powered Task Management</p>
+        </div>
+
+        {/* Main Card */}
+        <div className="bg-agent-card-gradient rounded-xl shadow-agent-lg p-4 border border-agent-gray-lighter">
+          <div className="flex justify-between items-center mb-4">
+            <div>
+              <h2 className="text-xl font-semibold text-agent-text mb-0">Your Tasks</h2>
+              <p className="text-agent-text-muted text-sm">Manage your productivity with AI assistance</p>
+            </div>
             <div className="flex gap-2">
               <button
                 onClick={() => setShowAIChat(true)}
-                className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-all duration-200 shadow-md hover:shadow-lg"
+                className="bg-agent-orange-gradient hover:shadow-agent-orange text-white px-4 py-2 rounded-lg flex items-center gap-2 text-sm font-medium transition-all duration-200 shadow-agent"
               >
-                <Bot size={20} />
+                <Bot size={16} />
                 Create with AI
               </button>
               <button
                 onClick={() => setShowForm(true)}
-                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
+                className="bg-agent-gray-light hover:bg-agent-gray-lighter text-agent-text px-4 py-2 rounded-lg flex items-center gap-2 text-sm font-medium transition-all duration-200 border border-agent-gray-lighter"
               >
-                <Plus size={20} />
-                Add Todo
+                <Plus size={16} />
+                Add Task
               </button>
             </div>
           </div>
@@ -159,18 +169,41 @@ export default function Home() {
           )}
 
           {showForm && (
-            <div className="mb-6">
-              <TodoForm
-                onSubmit={createTodo}
-                onCancel={() => setShowForm(false)}
-              />
+            <div className="mb-4">
+              <div className="bg-agent-card-gradient border border-agent-gray-lighter rounded-xl p-4 shadow-agent">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 bg-agent-gray-light rounded-lg flex items-center justify-center border border-agent-gray-lighter">
+                      <Plus className="h-5 w-5 text-agent-text" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-agent-text">Create New Task</h3>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setShowForm(false)}
+                    className="p-2 text-agent-text-muted hover:text-agent-text hover:bg-agent-gray-light rounded-lg transition-all duration-200"
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+                <TodoForm
+                  onSubmit={createTodo}
+                  onCancel={() => setShowForm(false)}
+                />
+              </div>
             </div>
           )}
 
-          <div className="space-y-3">
+          {/* Tasks List */}
+          <div className="space-y-2">
             {todos.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">
-                No todos yet. Add one to get started!
+              <div className="text-center py-8">
+                <div className="w-12 h-12 mx-auto mb-3 bg-agent-gray-light rounded-full flex items-center justify-center">
+                  <Bot className="w-6 h-6 text-agent-text-muted" />
+                </div>
+                <h3 className="text-agent-text-secondary text-base font-medium mb-1">No tasks yet</h3>
+                <p className="text-agent-text-muted text-sm">Create your first task to get started!</p>
               </div>
             ) : (
               todos.map((todo) => (
@@ -184,22 +217,32 @@ export default function Home() {
               ))
             )}
           </div>
+        </div>
 
-          {editingTodo && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-              <div className="bg-white rounded-lg p-6 w-full max-w-md">
-                <h2 className="text-xl font-semibold mb-4">Edit Todo</h2>
-                <TodoForm
-                  initialData={{
-                    title: editingTodo.title,
-                    description: editingTodo.description || '',
-                  }}
-                  onSubmit={(data) => updateTodo(editingTodo.id, data)}
-                  onCancel={() => setEditingTodo(null)}
-                />
-              </div>
+        {/* Edit Modal */}
+        {editingTodo && (
+          <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50">
+            <div className="bg-agent-card-gradient rounded-xl p-6 w-full max-w-md shadow-agent-lg border border-agent-gray-lighter">
+              <h2 className="text-xl font-semibold text-agent-text mb-4">Edit Task</h2>
+              <TodoForm
+                initialData={{
+                  title: editingTodo.title,
+                  description: editingTodo.description || '',
+                }}
+                onSubmit={(data) => updateTodo(editingTodo.id, data)}
+                onCancel={() => setEditingTodo(null)}
+              />
             </div>
-          )}
+          </div>
+        )}
+        
+        {/* Footer */}
+        <div className="text-center mt-12">
+          <div className="inline-flex items-center gap-2 text-agent-text-muted text-sm">
+            <div className="w-2 h-2 bg-agent-orange rounded-full"></div>
+            <span>Powered by AI Agents</span>
+            <div className="w-2 h-2 bg-agent-accent rounded-full"></div>
+          </div>
         </div>
       </div>
     </div>

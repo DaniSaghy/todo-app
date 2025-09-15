@@ -5,8 +5,8 @@ import './globals.css';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata = {
-  title: 'Todo App',
-  description: 'A simple and clean todo application',
+  title: 'Todo App - AI-Powered Task Management',
+  description: 'Transform your productivity with AI-powered task management. Create, organize, and complete tasks using intelligent agents that understand natural language.',
 };
 
 export default function RootLayout({
