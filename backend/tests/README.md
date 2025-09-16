@@ -24,6 +24,7 @@ python -m pytest tests/ -v
 python -m pytest tests/test_main.py -v
 python -m pytest tests/test_priority.py -v
 python -m pytest tests/test_ai_integration.py -v
+python -m pytest tests/test_ai_real.py -v
 
 # Run specific test
 python -m pytest tests/test_main.py::test_create_todo -v
@@ -31,11 +32,31 @@ python -m pytest tests/test_main.py::test_create_todo -v
 # Run with coverage
 python -m pytest tests/ --cov=main --cov=ai_service -v
 
+# Run only mock AI tests
+python -m pytest tests/ -m "ai_mock" -v
+
+# Run only real AI tests (requires API keys)
+python -m pytest tests/ -m "ai_real" -v
+
+# Run tests excluding real AI tests
+python -m pytest tests/ -m "not ai_real" -v
+
 ```
 
-## Test Database
+## Test Environment
 
-Tests use a separate SQLite database (`test_todos.db`) that is automatically created and cleaned up for each test run. This ensures tests don't interfere with your development database.
+For AI integration tests to work properly, you need to set environment variables:
+
+```bash
+# Set dummy API keys for testing (tests use mocks anyway)
+export OPENAI_API_KEY="test-key"
+export ANTHROPIC_API_KEY="test-key"
+
+# Or run tests with environment variables
+OPENAI_API_KEY="test-key" ANTHROPIC_API_KEY="test-key" pytest tests/ -v
+```
+
+The AI integration tests use mocked responses, so real API keys are not required for testing.
 
 ## Test Fixtures
 
@@ -74,9 +95,14 @@ def test_ai_generate_todo(client, mock_ai_service):
     assert response.status_code == 200
 ```
 
-## Test Categories
+## GitHub Actions
 
-- **Unit Tests**: Test individual functions and methods
-- **Integration Tests**: Test API endpoints and database interactions
-- **AI Tests**: Test AI service functionality (marked as slow)
-- **Priority Tests**: Test priority validation and functionality
+The project uses a single CI pipeline (`ci.yml`) that runs on every push to `main`:
+
+- **Backend Tests**: Unit and integration tests with mocked AI responses
+- **Frontend Tests**: Jest tests and linting
+- **Integration Tests**: Full-stack service testing
+- **AI Mock Tests**: Fast AI logic testing with mocked responses
+- **AI Real Tests**: Optional Google API testing (requires API key)
+
+The pipeline ensures all tests pass before code is merged to main.

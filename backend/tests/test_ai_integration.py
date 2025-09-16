@@ -13,6 +13,7 @@ import asyncio
 from unittest.mock import patch, AsyncMock
 from ai_service import AITodoService, TodoGenerationRequest, TodoGenerationResult, ai_service
 
+@pytest.mark.ai_mock
 class TestAITodoService:
     """Test cases for AI Todo Service"""
     
@@ -108,6 +109,7 @@ class TestAITodoService:
         parsed = self.ai_service._parse_llm_response(invalid_response)
         assert parsed is None
 
+@pytest.mark.ai_mock
 class TestAIEndpoint:
     """Test cases for AI endpoint"""
     
@@ -210,6 +212,7 @@ class TestAIEndpoint:
             assert data["detail"]["success"] is False
             assert "unexpected error" in data["detail"]["error"].lower()
 
+@pytest.mark.ai_mock
 class TestAIPriorityDetermination:
     """Test cases for AI priority determination"""
     
@@ -324,39 +327,45 @@ class TestAIPriorityDetermination:
             assert data["priority"] == 0
             assert data["fallback_used"] is True
 
+@pytest.mark.ai_mock
 class TestIntegrationScenarios:
-    """Integration test scenarios"""
+    """Integration test scenarios with mocked AI responses"""
     
     def test_complete_flow_with_mock_llm(self):
         """Test complete flow with mocked LLM"""
-        with patch('ai_service.ai_service._call_llm') as mock_call:
-            mock_call.return_value = '{"title": "Submit taxes", "description": "Due next Monday at noon", "priority": 2}'
-            
-            # Test the complete flow
-            request = TodoGenerationRequest(user_input="remind me to submit taxes next Monday at noon")
-            
-            # This would normally be async, but we're testing the logic
-            result = asyncio.run(ai_service.generate_todo(request))
-            
-            assert result.success is True
-            assert result.title == "Submit taxes"
-            assert result.description == "Due next Monday at noon"
-            assert result.priority == 2
+        # Mock the providers to avoid initialization issues
+        with patch.object(ai_service, 'providers', ['mock_provider']):
+            with patch('ai_service.ai_service._call_llm') as mock_call:
+                mock_call.return_value = '{"title": "Submit taxes", "description": "Due next Monday at noon", "priority": 2}'
+                
+                # Test the complete flow
+                request = TodoGenerationRequest(user_input="remind me to submit taxes next Monday at noon")
+                
+                # This would normally be async, but we're testing the logic
+                result = asyncio.run(ai_service.generate_todo(request))
+                
+                assert result.success is True
+                assert result.title == "Submit taxes"
+                assert result.description == "Due next Monday at noon"
+                assert result.priority == 2
     
     def test_multiple_provider_fallback(self):
         """Test fallback between multiple providers"""
-        with patch('ai_service.ai_service._call_llm') as mock_call:
-            # First provider fails, second succeeds
-            mock_call.side_effect = [
-                Exception("Provider 1 failed"),
-                '{"title": "Buy groceries", "description": "For the weekend"}'
-            ]
-            
-            request = TodoGenerationRequest(user_input="buy groceries for the weekend")
-            result = asyncio.run(ai_service.generate_todo(request))
-            
-            assert result.success is True
-            assert result.title == "buy groceries for th..."
+        # Mock the providers to avoid initialization issues
+        with patch.object(ai_service, 'providers', ['provider1', 'provider2']):
+            with patch('ai_service.ai_service._call_llm') as mock_call:
+                # First provider fails, second succeeds
+                mock_call.side_effect = [
+                    Exception("Provider 1 failed"),
+                    '{"title": "Buy groceries", "description": "For the weekend"}'
+                ]
+                
+                request = TodoGenerationRequest(user_input="buy groceries for the weekend")
+                result = asyncio.run(ai_service.generate_todo(request))
+                
+                assert result.success is True
+                assert result.title == "Buy groceries"
+                assert result.description == "For the weekend"
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

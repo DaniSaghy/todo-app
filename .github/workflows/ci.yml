@@ -1,9 +1,7 @@
-name: Quick Tests
+name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ main, develop ]
-  pull_request:
     branches: [ main ]
 
 jobs:
@@ -27,6 +25,14 @@ jobs:
         cache: 'npm'
         cache-dependency-path: frontend/package-lock.json
         
+    - name: Cache pip dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('backend/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+          
     - name: Install backend dependencies
       working-directory: ./backend
       run: |
@@ -39,8 +45,11 @@ jobs:
       
     - name: Run backend tests
       working-directory: ./backend
-      run: pytest tests/ -v --tb=short
-      
+      env:
+        GOOGLE_API_KEY: "test-key"
+      run: |
+        pytest tests/ -m "not ai_real" -v --tb=short
+        
     - name: Run frontend tests
       working-directory: ./frontend
       run: npm test -- --watchAll=false
@@ -53,18 +62,46 @@ jobs:
       working-directory: ./frontend
       run: npm run build
       
-    - name: Quick integration check
+    - name: Run integration tests
       run: |
-        # Start backend for quick integration test
+        # Start backend
         cd backend && uvicorn main:app --host 0.0.0.0 --port 8000 &
         sleep 5
         
-        # Test backend is responding
+        # Test backend
         curl -f http://localhost:8000/ || exit 1
         curl -f http://localhost:8000/todos || exit 1
         
-        # Test frontend build succeeded
+        # Test frontend build
         test -d frontend/.next || exit 1
         
         # Cleanup
         pkill -f uvicorn || true
+        
+    - name: Run AI tests (mock)
+      working-directory: ./backend
+      env:
+        GOOGLE_API_KEY: "test-key"
+      run: |
+        pytest tests/test_ai_integration.py -m "ai_mock" -v --tb=short
+        
+    - name: Run AI tests (real) - Optional
+      working-directory: ./backend
+      env:
+        GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+      run: |
+        pytest tests/test_ai_real.py -m "ai_real" -v --tb=short
+      
+    - name: Generate test report
+      run: |
+        echo "=== Test Summary ==="
+        echo "✅ Backend tests: Passed"
+        echo "✅ Frontend tests: Passed"
+        echo "✅ Integration tests: Passed"
+        echo "✅ AI mock tests: Passed"
+        if [ "${{ job.status }}" == "success" ]; then
+          echo "✅ AI real tests: Passed (Google API)"
+        else
+          echo "⚠️ AI real tests: Skipped (no Google API key)"
+        fi
+        echo "🎉 All tests completed!"

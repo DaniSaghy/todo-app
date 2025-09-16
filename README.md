@@ -102,20 +102,27 @@ cd frontend && npm test
 
 ### Continuous Integration
 
-GitHub Actions automatically runs tests on every push to `main`:
+GitHub Actions automatically runs a comprehensive test suite on every push to `main`:
 
-- **Backend Tests**: Python 3.11, pytest with coverage
+- **Backend Tests**: Python 3.11, pytest with mocked AI responses
 - **Frontend Tests**: Node.js 20, Jest with coverage  
-- **Integration Tests**: Full-stack testing with both services running
-- **AI Tests**: Dedicated workflow for AI service testing
+- **Integration Tests**: Full-stack testing with both services
+- **AI Mock Tests**: Fast AI testing with mocked responses
+- **AI Real Tests**: Actual Google API testing (optional, requires API key)
 
-The integration tests verify:
+The CI pipeline verifies:
 - Backend API endpoints (CRUD operations)
 - Frontend build and serving
 - Service-to-service communication
-- AI endpoint availability
+- AI endpoint functionality
 
-View test results and coverage reports in the [Actions tab](https://github.com/yourusername/todo-app/actions) of your repository.
+**AI Testing Strategy**:
+- **Mock Tests**: Always run, test AI logic with mocked responses
+- **Real Tests**: Run with Google API key, test actual AI integration (optional)
+
+See [AI_TESTING_SETUP.md](AI_TESTING_SETUP.md) for detailed AI testing configuration with Google API.
+
+View test results in the [Actions tab](https://github.com/yourusername/todo-app/actions) of your repository.
 
 ## API Endpoints
 
