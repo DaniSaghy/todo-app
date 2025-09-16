@@ -30,7 +30,7 @@ class TestRealAIIntegration:
     @pytest.mark.asyncio
     async def test_real_todo_generation_google(self):
         """Test real todo generation with Google Gemini"""
-        if 'google' not in self.ai_service.get_available_providers():
+        if 'gemini/gemini-2.0-flash' not in self.ai_service.get_available_providers():
             pytest.skip("Google provider not available")
             
         request = TodoGenerationRequest(
@@ -50,7 +50,7 @@ class TestRealAIIntegration:
     @pytest.mark.asyncio
     async def test_real_todo_generation_google_simple(self):
         """Test real todo generation with Google Gemini - simple task"""
-        if 'google' not in self.ai_service.get_available_providers():
+        if 'gemini/gemini-2.0-flash' not in self.ai_service.get_available_providers():
             pytest.skip("Google provider not available")
             
         request = TodoGenerationRequest(
@@ -89,7 +89,7 @@ class TestRealAIIntegration:
         """Test that Google provider works correctly"""
         providers = self.ai_service.get_available_providers()
         
-        if 'google' not in providers:
+        if 'gemini/gemini-2.0-flash' not in providers:
             pytest.skip("Google provider not available")
             
         request = TodoGenerationRequest(

@@ -114,6 +114,10 @@ class AITodoService:
         logger.info(f"Available providers: {providers}")
         return providers
     
+    def get_available_providers(self) -> List[str]:
+        """Get list of available LLM providers (public method)"""
+        return self.providers.copy()
+    
     def _configure_litellm(self):
         """Configure LiteLLM settings"""
         # Set timeout and other configurations
