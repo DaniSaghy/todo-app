@@ -1,6 +1,6 @@
 # Todo App
 
-[![Tests](https://github.com/danielsaghy/todo-app/actions/workflows/ci.yml/badge.svg)](https://github.com/danielsaghy/todo-app/actions)
+[![Tests](https://github.com/DaniSaghy/todo-app/actions/workflows/ci.yml/badge.svg)](https://github.com/DaniSaghy/todo-app/actions)
 
 A full-stack Todo application built with Next.js and FastAPI.
 
