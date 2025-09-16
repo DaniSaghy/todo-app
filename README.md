@@ -5,12 +5,14 @@ A full-stack Todo application built with Next.js and FastAPI.
 ## Features
 
 - **Add, Edit, Delete, and Mark Complete** todos
-- **Modern UI** with Tailwind CSS
+- **Priority System** with visual indicators (Low/Medium/High)
+- **AI-Powered Todo Generation** using natural language
+- **Modern UI** with Tailwind CSS and responsive design
 - **Real-time updates** with React state management
 - **SQLite database** for data persistence
-- **Comprehensive testing** setup
+- **Comprehensive testing** setup with pytest and Jest
 - **Docker support** for easy deployment
-- **Responsive design** for all devices
+- **Multiple AI Providers** support (OpenAI, Anthropic, Google, Cohere, Ollama)
 
 ## Tech Stack
 
@@ -27,6 +29,8 @@ A full-stack Todo application built with Next.js and FastAPI.
 - **SQLite** for data persistence
 - **Pydantic** for data validation
 - **Uvicorn** as ASGI server
+- **LiteLLM** for AI provider abstraction
+- **python-dotenv** for environment management
 
 ## Project Structure
 
@@ -35,13 +39,24 @@ todo-app/
 ├── frontend/                # Next.js frontend application
 │   ├── app/                 # App Router pages and layouts
 │   ├── components/          # Reusable React components
+│   │   ├── AITodoChat.tsx   # AI-powered todo generation
+│   │   ├── PriorityIcon.tsx # Priority visual indicators
+│   │   ├── TodoForm.tsx     # Todo creation/editing form
+│   │   └── TodoItem.tsx     # Individual todo display
 │   ├── __tests__/           # Frontend tests
 │   └── package.json         # Frontend dependencies
 ├── backend/                 # FastAPI backend application
 │   ├── main.py              # FastAPI application entry point
-│   ├── test_main.py         # Backend tests
-│   └── requirements.txt     # Backend dependencies
+│   ├── ai_service.py        # AI integration service
+│   ├── tests/               # Backend test suite
+│   │   ├── test_main.py     # API endpoint tests
+│   │   ├── test_ai_integration.py # AI service tests
+│   │   └── test_priority.py # Priority functionality tests
+│   ├── requirements.txt     # Backend dependencies
+│   └── env.example          # Environment variables template
 ├── docker-compose.yml       # Docker orchestration
+├── AI_INTEGRATION.md        # AI features documentation
+├── DEVELOPMENT.md           # Development setup guide
 └── README.md               # This file
 ```
 
@@ -62,6 +77,8 @@ cd frontend && npm install && npm run dev
 # Or use Docker
 docker-compose up --build
 ```
+
+**For AI features:** Copy `backend/env.example` to `backend/.env` and add your API keys. See [AI_INTEGRATION.md](AI_INTEGRATION.md) for details.
 
 - **Frontend**: `http://localhost:3000`
 - **Backend**: `http://localhost:8000`
@@ -90,14 +107,15 @@ cd frontend && npm test
 | GET | `/todos/{id}` | Get a specific todo |
 | PUT | `/todos/{id}` | Update a todo |
 | DELETE | `/todos/{id}` | Delete a todo |
+| POST | `/ai/generate-todo` | Generate todo from natural language |
 
 ### Example API Usage
 
 ```bash
-# Create a todo
+# Create a todo with priority
 curl -X POST "http://localhost:8000/todos" \
      -H "Content-Type: application/json" \
-     -d '{"title": "Learn FastAPI", "description": "Build awesome APIs"}'
+     -d '{"title": "Learn FastAPI", "description": "Build awesome APIs", "priority": 2}'
 
 # Get all todos
 curl "http://localhost:8000/todos"
@@ -105,25 +123,33 @@ curl "http://localhost:8000/todos"
 # Update a todo
 curl -X PUT "http://localhost:8000/todos/1" \
      -H "Content-Type: application/json" \
-     -d '{"completed": true}'
+     -d '{"completed": true, "priority": 1}'
 
 # Delete a todo
 curl -X DELETE "http://localhost:8000/todos/1"
+
+# Generate todo with AI
+curl -X POST "http://localhost:8000/ai/generate-todo" \
+     -H "Content-Type: application/json" \
+     -d '{"prompt": "remind me to submit taxes next Monday"}'
 ```
 
 ## UI Components
 
-- **TodoForm**: Form for creating and editing todos
-- **TodoItem**: Individual todo item with actions
-- **Main Page**: Complete todo management interface
+- **TodoForm**: Form for creating and editing todos with priority selection
+- **TodoItem**: Individual todo item with actions and priority indicators
+- **AITodoChat**: AI-powered todo generation interface
+- **PriorityIcon**: Visual priority indicators (Low/Medium/High)
+- **Main Page**: Complete todo management interface with sorting and filtering
 
 ## Development
 
 ### Adding New Features
 
-1. **Backend**: Add new endpoints in `main.py`
+1. **Backend**: Add new endpoints in `main.py` or create new service files
 2. **Frontend**: Create components in `components/` directory
 3. **Tests**: Add corresponding tests in `__tests__/` or `test_*.py`
+4. **AI Features**: Extend `ai_service.py` for new AI capabilities
 
 ### Code Style
 
