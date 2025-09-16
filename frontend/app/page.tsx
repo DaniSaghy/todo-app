@@ -1,10 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Plus, Bot, X } from 'lucide-react';
+import { Plus, Bot, X, ArrowUpDown } from 'lucide-react';
 import TodoItem from '@/components/TodoItem';
 import TodoForm from '@/components/TodoForm';
 import AITodoChat from '@/components/AITodoChat';
+import PriorityIcon from '@/components/PriorityIcon';
 
 export interface Todo {
   id: number;
@@ -37,6 +38,8 @@ export default function Home() {
   const [editingTodo, setEditingTodo] = useState<Todo | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [showAIChat, setShowAIChat] = useState(false);
+  const [selectedPriority, setSelectedPriority] = useState<number | null>(null);
+  const [sortByPriority, setSortByPriority] = useState(false);
 
   // Fetch todos from API
   const fetchTodos = async () => {
@@ -118,6 +121,22 @@ export default function Home() {
     }
   };
 
+  // Filter and sort todos
+  const filteredAndSortedTodos = todos
+    .filter(todo => selectedPriority === null || todo.priority === selectedPriority)
+    .sort((a, b) => {
+      if (sortByPriority) {
+        // Sort by priority (high to low), then by creation date (newest first)
+        if (a.priority !== b.priority) {
+          return b.priority - a.priority;
+        }
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      } else {
+        // Default: newest first
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      }
+    });
+
   useEffect(() => {
     fetchTodos();
   }, []);
@@ -198,18 +217,61 @@ export default function Home() {
             </div>
           )}
 
+          {/* Filter and Sort Controls */}
+          <div className="flex items-center justify-between mb-4 p-3 bg-agent-gray-light rounded-lg border border-agent-gray-lighter">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium text-agent-text-secondary">Filter by priority:</span>
+              <div className="flex gap-1">
+                  {[
+                    { value: 0, label: 'Low', hoverColor: 'hover:bg-blue-600', selectedColor: 'bg-blue-500' },
+                    { value: 1, label: 'Medium', hoverColor: 'hover:bg-yellow-600', selectedColor: 'bg-yellow-500' },
+                    { value: 2, label: 'High', hoverColor: 'hover:bg-red-600', selectedColor: 'bg-red-500' }
+                  ].map((option) => (
+                    <button
+                      key={option.value}
+                      onClick={() => setSelectedPriority(selectedPriority === option.value ? null : option.value)}
+                      className={`flex items-center gap-1 px-2 py-1 rounded-md border text-xs font-medium transition-all duration-200 ${
+                        selectedPriority === option.value
+                          ? `border-agent-orange ${option.selectedColor}`
+                          : `border-agent-gray-lighter bg-agent-gray-light hover:border-agent-gray-lighter ${option.hoverColor}`
+                      }`}
+                  >
+                    <PriorityIcon priority={option.value} size={12} />
+                    <span className="text-agent-text">{option.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+            
+            <button
+              onClick={() => setSortByPriority(!sortByPriority)}
+              className={`flex items-center gap-2 px-3 py-2 rounded-lg border transition-all duration-200 ${
+                sortByPriority
+                  ? 'border-agent-orange bg-agent-orange/10 text-agent-orange'
+                  : 'border-agent-gray-lighter bg-agent-gray-light hover:border-agent-gray-lighter text-agent-text-secondary hover:text-agent-text'
+              }`}
+            >
+              <ArrowUpDown size={14} />
+              <span className="text-xs font-medium">Sort by Priority</span>
+            </button>
+          </div>
+
           {/* Tasks List */}
           <div className="space-y-2">
-            {todos.length === 0 ? (
+            {filteredAndSortedTodos.length === 0 ? (
               <div className="text-center py-8">
                 <div className="w-12 h-12 mx-auto mb-3 bg-agent-gray-light rounded-full flex items-center justify-center">
                   <Bot className="w-6 h-6 text-agent-text-muted" />
                 </div>
-                <h3 className="text-agent-text-secondary text-base font-medium mb-1">No tasks yet</h3>
-                <p className="text-agent-text-muted text-sm">Create your first task to get started!</p>
+                <h3 className="text-agent-text-secondary text-base font-medium mb-1">
+                  {todos.length === 0 ? 'No tasks yet' : 'No tasks match your filter'}
+                </h3>
+                <p className="text-agent-text-muted text-sm">
+                  {todos.length === 0 ? 'Create your first task to get started!' : 'Try adjusting your priority filter'}
+                </p>
               </div>
             ) : (
-              todos.map((todo) => (
+              filteredAndSortedTodos.map((todo) => (
                 <TodoItem
                   key={todo.id}
                   todo={todo}
