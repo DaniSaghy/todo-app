@@ -1,7 +1,6 @@
 # Todo App
 
-[![Tests](https://github.com/yourusername/todo-app/workflows/Quick%20Tests/badge.svg)](https://github.com/yourusername/todo-app/actions)
-[![Coverage](https://codecov.io/gh/yourusername/todo-app/branch/main/graph/badge.svg)](https://codecov.io/gh/yourusername/todo-app)
+[![Tests](https://github.com/danielsaghy/todo-app/workflows/CI%2FCD%20Pipeline/badge.svg)](https://github.com/danielsaghy/todo-app/actions)
 
 A full-stack Todo application built with Next.js and FastAPI.
 
