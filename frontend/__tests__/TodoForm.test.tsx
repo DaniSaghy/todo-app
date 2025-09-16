@@ -36,7 +36,8 @@ describe('TodoForm', () => {
     await waitFor(() => {
       expect(mockOnSubmit).toHaveBeenCalledWith({
         title: 'Test Todo',
-        description: 'Test Description'
+        description: 'Test Description',
+        priority: 0
       });
     });
   });

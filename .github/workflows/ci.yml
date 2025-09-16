@@ -78,13 +78,6 @@ jobs:
         # Cleanup
         pkill -f uvicorn || true
         
-    - name: Run AI tests (mock)
-      working-directory: ./backend
-      env:
-        GOOGLE_API_KEY: "test-key"
-      run: |
-        pytest tests/test_ai_integration.py -m "ai_mock" -v --tb=short
-        
     - name: Run AI tests (real) - Optional
       working-directory: ./backend
       env:

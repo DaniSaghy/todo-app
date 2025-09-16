@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { Bot, Send, X, Loader2, AlertCircle } from 'lucide-react';
 import { TodoCreate } from '@/app/page';
-import PriorityIcon from './PriorityIcon';
 
 interface AITodoChatProps {
   onSubmit: (data: TodoCreate) => void;

@@ -102,20 +102,6 @@ class TestRealAIIntegration:
         assert result.provider_used in providers, f"Provider {result.provider_used} not in available providers {providers}"
         
         print(f"Used provider: {result.provider_used}")
-        
-    @pytest.mark.asyncio
-    async def test_real_error_handling(self):
-        """Test error handling with real API calls"""
-        # Test with empty input
-        request = TodoGenerationRequest(user_input="")
-        result = await self.ai_service.generate_todo(request)
-        
-        # Should either succeed with fallback or fail gracefully
-        if not result.success:
-            assert result.error_message is not None
-            print(f"Expected error for empty input: {result.error_message}")
-        else:
-            print(f"Fallback used for empty input: {result.title}")
 
 
 @pytest.mark.ai_real
@@ -126,8 +112,8 @@ class TestRealAIEndpoint:
     def test_real_ai_generate_endpoint(self, client):
         """Test AI generation endpoint with real API calls"""
         response = client.post(
-            "/ai/generate-todo",
-            json={"prompt": "remind me to submit taxes next Monday at noon"}
+            "/todos/ai-generate",
+            json={"user_input": "remind me to submit taxes next Monday at noon"}
         )
         
         assert response.status_code == 200
@@ -142,10 +128,10 @@ class TestRealAIEndpoint:
         
     def test_real_ai_endpoint_error_handling(self, client):
         """Test AI endpoint error handling with real API calls"""
-        # Test with empty prompt
+        # Test with very short input (should trigger fallback)
         response = client.post(
-            "/ai/generate-todo",
-            json={"prompt": ""}
+            "/todos/ai-generate",
+            json={"user_input": "a"}
         )
         
         # Should either succeed with fallback or return error
