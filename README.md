@@ -1,5 +1,8 @@
 # Todo App
 
+[![Tests](https://github.com/yourusername/todo-app/workflows/Quick%20Tests/badge.svg)](https://github.com/yourusername/todo-app/actions)
+[![Coverage](https://codecov.io/gh/yourusername/todo-app/branch/main/graph/badge.svg)](https://codecov.io/gh/yourusername/todo-app)
+
 A full-stack Todo application built with Next.js and FastAPI.
 
 ## Features
@@ -96,6 +99,23 @@ cd backend && pytest -v
 # Frontend tests  
 cd frontend && npm test
 ```
+
+### Continuous Integration
+
+GitHub Actions automatically runs tests on every push to `main`:
+
+- **Backend Tests**: Python 3.11, pytest with coverage
+- **Frontend Tests**: Node.js 20, Jest with coverage  
+- **Integration Tests**: Full-stack testing with both services running
+- **AI Tests**: Dedicated workflow for AI service testing
+
+The integration tests verify:
+- Backend API endpoints (CRUD operations)
+- Frontend build and serving
+- Service-to-service communication
+- AI endpoint availability
+
+View test results and coverage reports in the [Actions tab](https://github.com/yourusername/todo-app/actions) of your repository.
 
 ## API Endpoints
 
