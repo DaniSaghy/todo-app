@@ -40,6 +40,7 @@ class TodoGenerationResult:
     success: bool
     title: Optional[str] = None
     description: Optional[str] = None
+    priority: Optional[int] = None
     error_message: Optional[str] = None
     fallback_used: bool = False
     provider_used: Optional[str] = None
@@ -75,6 +76,7 @@ class TodoGenerationResponse(BaseModel):
     """Response model for todo generation"""
     title: str = Field(..., min_length=1, max_length=200, description="Generated todo title")
     description: Optional[str] = Field(None, max_length=1000, description="Generated todo description")
+    priority: int = Field(..., ge=0, le=2, description="Priority level (0=low, 1=medium, 2=high)")
 
 class AITodoService:
     """
@@ -122,24 +124,35 @@ class AITodoService:
         """Get the system prompt for todo generation"""
         return """You are a helpful AI assistant that converts natural language requests into structured todo items.
 
-Your task is to extract a clear title and optional description from user input.
+Your task is to extract a clear title, optional description, and appropriate priority level from user input.
 
 Guidelines:
-1. Create concise, actionable titles (max 200 characters)
-2. Extract relevant details for descriptions (max 1000 characters)
+1. Create concise, actionable titles (max 40 characters)
+2. Extract relevant details for descriptions (max 50 characters)
 3. Handle time references appropriately (convert to clear descriptions)
 4. Focus on the core task, not meta-instructions
 5. Be helpful but stay focused on todo creation
 
+Priority Level Guidelines:
+- Priority 0 (Low): Routine tasks, non-urgent items, personal preferences
+  Examples: "buy groceries", "read a book", "organize desk", "call mom this weekend"
+- Priority 1 (Medium): Important tasks with moderate urgency, work-related items
+  Examples: "submit report by Friday", "schedule dentist appointment", "review project proposal"
+- Priority 2 (High): Urgent tasks, deadlines, critical items, emergencies
+  Examples: "urgent: fix server issue", "deadline: submit taxes tomorrow", "emergency: call doctor"
+
 Examples:
-- "remind me to submit taxes next Monday at noon" → Title: "Submit taxes", Description: "Due next Monday at noon"
-- "buy groceries" → Title: "Buy groceries", Description: None
-- "call mom this weekend" → Title: "Call mom", Description: "This weekend"
+- "remind me to submit taxes next Monday at noon" → Title: "Submit taxes", Description: "Due next Monday at noon", Priority: 2
+- "buy groceries" → Title: "Buy groceries", Description: None, Priority: 0
+- "call mom this weekend" → Title: "Call mom", Description: "This weekend", Priority: 0
+- "urgent: fix the server issue immediately" → Title: "Fix server issue", Description: "Urgent", Priority: 2
+- "schedule team meeting for next week" → Title: "Schedule team meeting", Description: "Next week", Priority: 1
 
 Always respond with valid JSON in this exact format:
 {
     "title": "string",
-    "description": "string or null"
+    "description": "string or null",
+    "priority": 0
 }"""
 
     def _get_user_prompt(self, user_input: str) -> str:
@@ -155,7 +168,7 @@ Always respond with valid JSON in this exact format:
 
     @retry(
         stop=stop_after_attempt(3),
-        wait=wait_exponential(multiplier=1, min=4, max=10),
+        wait=wait_exponential(multiplier=1, min=3, max=5),
         retry=retry_if_exception_type((Exception,))
     )
     def _call_llm(self, provider: str, messages: List[Dict[str, str]]) -> str:
@@ -197,7 +210,8 @@ Always respond with valid JSON in this exact format:
             # Create response object with validation
             return TodoGenerationResponse(
                 title=data['title'],
-                description=data.get('description')
+                description=data.get('description'),
+                priority=data.get('priority', 0)
             )
             
         except (json.JSONDecodeError, ValueError, KeyError) as e:
@@ -207,16 +221,17 @@ Always respond with valid JSON in this exact format:
     def _create_fallback_todo(self, user_input: str) -> TodoGenerationResult:
         """Create a fallback todo when LLM fails"""
         # Simple fallback: use first 50 characters as title
-        title = user_input[:50].strip()
-        if len(user_input) > 50:
+        title = user_input[:20].strip()
+        if len(user_input) > 20:
             title += "..."
             
-        description = user_input[50:].strip() if len(user_input) > 50 else None
+        description = user_input[20:].strip() if len(user_input) > 20 else None
         
         return TodoGenerationResult(
             success=True,
             title=title,
             description=description,
+            priority=0,  # Default priority for fallback
             fallback_used=True,
             provider_used="fallback"
         )
@@ -251,6 +266,7 @@ Always respond with valid JSON in this exact format:
                         success=True,
                         title=parsed_response.title,
                         description=parsed_response.description,
+                        priority=parsed_response.priority,
                         provider_used=provider
                     )
                 else:

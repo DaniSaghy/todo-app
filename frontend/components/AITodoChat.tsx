@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Bot, Send, X, Loader2, AlertCircle } from 'lucide-react';
 import { TodoCreate } from '@/app/page';
+import PriorityIcon from './PriorityIcon';
 
 interface AITodoChatProps {
   onSubmit: (data: TodoCreate) => void;
@@ -13,6 +14,7 @@ interface AIResponse {
   success: boolean;
   title?: string;
   description?: string;
+  priority?: number;
   fallback_used?: boolean;
   provider_used?: string;
   error?: string;
@@ -28,8 +30,11 @@ export default function AITodoChat({ onSubmit, onCancel }: AITodoChatProps) {
 
   const examplePrompts = [
     "remind me to submit taxes next Monday at noon",
-    "buy groceries for the weekend",
-    "call mom this weekend"
+    "buy groceries for the weekend", 
+    "call mom this weekend",
+    "urgent: fix the server issue immediately",
+    "schedule team meeting for next week",
+    "read a book before bed"
   ];
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -55,10 +60,11 @@ export default function AITodoChat({ onSubmit, onCancel }: AITodoChatProps) {
       if (response.ok && data.success) {
         setLastResponse(data);
         
-        // Auto-submit the generated todo
+        // Auto-submit the generated todo with AI-determined priority
         onSubmit({
           title: data.title!,
-          description: data.description || undefined
+          description: data.description || undefined,
+          priority: data.priority || 0
         });
         
         // Reset form

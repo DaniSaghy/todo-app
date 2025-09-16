@@ -1,0 +1,65 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug pytest - test_priority.py",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "pytest",
+            "args": [
+                "tests/test_priority.py",
+                "-v",
+                "-s"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "cwd": "${workspaceFolder}/backend",
+            "python": "${workspaceFolder}/backend/venv/bin/python"
+        },
+        {
+            "name": "Debug pytest - All Tests",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "pytest",
+            "args": [
+                "tests/",
+                "-v",
+                "-s"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "cwd": "${workspaceFolder}/backend",
+            "python": "${workspaceFolder}/backend/venv/bin/python"
+        },
+        {
+            "name": "Debug pytest - Specific Test",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "pytest",
+            "args": [
+                "tests/test_priority.py::test_todos_by_priority",
+                "-v",
+                "-s"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "cwd": "${workspaceFolder}/backend",
+            "python": "${workspaceFolder}/backend/venv/bin/python"
+        },
+        {
+            "name": "Debug pytest - test_main.py",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "pytest",
+            "args": [
+                "tests/test_main.py",
+                "-v",
+                "-s"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "cwd": "${workspaceFolder}/backend",
+            "python": "${workspaceFolder}/backend/venv/bin/python"
+        }
+    ]
+}

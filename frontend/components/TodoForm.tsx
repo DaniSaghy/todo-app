@@ -3,11 +3,13 @@
 import { useState } from 'react';
 import { Check, X } from 'lucide-react';
 import { TodoCreate } from '@/app/page';
+import PriorityIcon from './PriorityIcon';
 
 interface TodoFormProps {
   initialData?: {
     title: string;
     description: string;
+    priority?: number;
   };
   onSubmit: (data: TodoCreate) => void;
   onCancel: () => void;
@@ -16,13 +18,19 @@ interface TodoFormProps {
 export default function TodoForm({ initialData, onSubmit, onCancel }: TodoFormProps) {
   const [title, setTitle] = useState(initialData?.title || '');
   const [description, setDescription] = useState(initialData?.description || '');
+  const [priority, setPriority] = useState(initialData?.priority ?? 0);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (title.trim()) {
-      onSubmit({ title: title.trim(), description: description.trim() || undefined });
+      onSubmit({ 
+        title: title.trim(), 
+        description: description.trim() || undefined,
+        priority: priority
+      });
       setTitle('');
       setDescription('');
+      setPriority(0);
     }
   };
 
@@ -55,6 +63,33 @@ export default function TodoForm({ initialData, onSubmit, onCancel }: TodoFormPr
           placeholder="Enter description (optional)..."
           rows={3}
         />
+      </div>
+
+      <div>
+        <label className="block text-sm font-semibold text-agent-text mb-2">
+          Priority
+        </label>
+        <div className="flex gap-2">
+          {[
+            { value: 0, label: 'Low', selectedColor: 'bg-agent-accent/20', hoverColor: 'hover:bg-agent-accent/30' },
+            { value: 1, label: 'Medium', selectedColor: 'bg-agent-orange/20', hoverColor: 'hover:bg-agent-orange/30' },
+            { value: 2, label: 'High', selectedColor: 'bg-agent-error/20', hoverColor: 'hover:bg-agent-error/30' }
+          ].map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              onClick={() => setPriority(option.value)}
+              className={`flex items-center gap-2 px-3 py-2 rounded-lg border transition-all duration-200 ${
+                priority === option.value
+                  ? `border-agent-orange bg-agent-orange/10 ${option.selectedColor}`
+                  : `border-agent-gray-lighter bg-agent-gray-light hover:border-agent-gray-lighter ${option.hoverColor}`
+              }`}
+            >
+              <PriorityIcon priority={option.value} size={16} />
+              <span className="text-sm font-medium text-agent-text">{option.label}</span>
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="flex gap-2">

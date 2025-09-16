@@ -13,17 +13,20 @@ export interface Todo {
   completed: boolean;
   created_at: string;
   updated_at?: string;
+  priority: number; // 0=low, 1=medium, 2=high
 }
 
 export interface TodoCreate {
   title: string;
   description?: string;
+  priority?: number;
 }
 
 export interface TodoUpdate {
   title?: string;
   description?: string;
   completed?: boolean;
+  priority?: number;
 }
 
 const API_BASE_URL = 'http://localhost:8000';
@@ -228,6 +231,7 @@ export default function Home() {
                 initialData={{
                   title: editingTodo.title,
                   description: editingTodo.description || '',
+                  priority: editingTodo.priority,
                 }}
                 onSubmit={(data) => updateTodo(editingTodo.id, data)}
                 onCancel={() => setEditingTodo(null)}

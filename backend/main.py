@@ -2,7 +2,7 @@ from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import create_engine, Column, Integer, String, Boolean, DateTime
 from sqlalchemy.orm import sessionmaker, Session, declarative_base
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 from datetime import datetime
 from typing import List, Optional
 import logging
@@ -30,6 +30,7 @@ class Todo(Base):
     completed = Column(Boolean, default=False)
     created_at = Column(DateTime, default=datetime.now)
     updated_at = Column(DateTime, nullable=True, onupdate=datetime.now)
+    priority = Column(Integer, default=0)
 
 # Create tables
 Base.metadata.create_all(bind=engine)
@@ -38,17 +39,35 @@ Base.metadata.create_all(bind=engine)
 class TodoCreate(BaseModel):
     title: str
     description: Optional[str] = None
+    completed: bool = False
+    priority: int = Field(default=0, ge=0, le=2)
+    
+    @field_validator('priority')
+    @classmethod
+    def validate_priority(cls, v):
+        if v < 0 or v > 2:
+            raise ValueError('Priority must be between 0 and 2')
+        return v
 
 class TodoUpdate(BaseModel):
     title: Optional[str] = None
     description: Optional[str] = None
     completed: Optional[bool] = None
+    priority: Optional[int] = Field(None, ge=0, le=2)
+    
+    @field_validator('priority')
+    @classmethod
+    def validate_priority(cls, v):
+        if v is not None and (v < 0 or v > 2):
+            raise ValueError('Priority must be between 0 and 2')
+        return v
 
 class TodoResponse(BaseModel):
     id: int
     title: str
     description: Optional[str]
     completed: bool
+    priority: int
     created_at: datetime
     updated_at: Optional[datetime]
     
@@ -83,18 +102,30 @@ def get_db():
 async def root():
     return {"message": "Todo API is running"}
 
-@app.get("/todos", response_model=List[TodoResponse])
-async def get_todos(db: Session = Depends(get_db)):
-    todos = db.query(Todo).order_by(Todo.created_at.desc()).all()
-    return todos
-
 @app.post("/todos", response_model=TodoResponse)
 async def create_todo(todo: TodoCreate, db: Session = Depends(get_db)):
-    db_todo = Todo(title=todo.title, description=todo.description)
+    db_todo = Todo(title=todo.title, description=todo.description, completed=todo.completed, priority=todo.priority)
     db.add(db_todo)
     db.commit()
     db.refresh(db_todo)
     return db_todo
+
+@app.get("/todos", response_model=List[TodoResponse])
+async def get_todos(db: Session = Depends(get_db)):
+    todos = db.query(Todo).order_by(Todo.created_at.desc()).all()
+    return todos    
+
+@app.get("/todos/completed", response_model=List[TodoResponse])
+async def get_completed_todos(db: Session = Depends(get_db)):
+    todos = db.query(Todo).filter(Todo.completed == True).order_by(Todo.created_at.desc()).all()
+    return todos
+
+@app.get("/todos/priority/{priority}", response_model=List[TodoResponse])
+async def get_todos_by_priority(priority: int, db: Session = Depends(get_db)):
+    if priority < 0 or priority > 2:
+        raise HTTPException(status_code=400, detail="Invalid priority")
+    todos = db.query(Todo).filter(Todo.priority == priority).order_by(Todo.created_at.desc()).all()
+    return todos
 
 @app.get("/todos/{todo_id}", response_model=TodoResponse)
 async def get_todo(todo_id: int, db: Session = Depends(get_db)):
@@ -148,6 +179,7 @@ async def generate_todo_with_ai(request: TodoGenerationRequest):
                 "success": True,
                 "title": result.title,
                 "description": result.description,
+                "priority": result.priority,
                 "fallback_used": result.fallback_used,
                 "provider_used": result.provider_used
             }

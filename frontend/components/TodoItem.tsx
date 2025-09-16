@@ -2,6 +2,7 @@
 
 import { Edit2, Trash2, Check } from 'lucide-react';
 import { Todo } from '@/app/page';
+import PriorityIcon from './PriorityIcon';
 
 interface TodoItemProps {
   todo: Todo;
@@ -44,11 +45,14 @@ export default function TodoItem({ todo, onEdit, onDelete, onToggle }: TodoItemP
         </button>
         
         <div className="flex-1 min-w-0">
-          <h3 className={`font-medium text-base ${
-            todo.completed ? 'text-agent-text-muted line-through' : 'text-agent-text'
-          }`}>
-            {todo.title}
-          </h3>
+          <div className="flex items-center gap-2 mb-1">
+            <h3 className={`font-medium text-base ${
+              todo.completed ? 'text-agent-text-muted line-through' : 'text-agent-text'
+            }`}>
+              {todo.title}
+            </h3>
+            <PriorityIcon priority={todo.priority} size={18} />
+          </div>
           {todo.description && (
             <p className={`text-sm mt-1 ${
               todo.completed ? 'text-agent-text-muted line-through' : 'text-agent-text-secondary'

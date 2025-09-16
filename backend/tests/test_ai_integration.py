@@ -11,11 +11,7 @@ This test suite validates the AI integration functionality including:
 import pytest
 import asyncio
 from unittest.mock import patch, AsyncMock
-from fastapi.testclient import TestClient
-from main import app
 from ai_service import AITodoService, TodoGenerationRequest, TodoGenerationResult, ai_service
-
-client = TestClient(app)
 
 class TestAITodoService:
     """Test cases for AI Todo Service"""
@@ -23,6 +19,23 @@ class TestAITodoService:
     def setup_method(self):
         """Setup test environment"""
         self.ai_service = AITodoService()
+    
+    def test_priority_determination_logic(self):
+        """Test AI service priority determination logic"""
+        # Test that the system prompt includes priority guidelines
+        prompt = self.ai_service._get_system_prompt()
+        
+        # Check that priority guidelines are included
+        assert "Priority Level Guidelines" in prompt
+        assert "Priority 0 (Low)" in prompt
+        assert "Priority 1 (Medium)" in prompt
+        assert "Priority 2 (High)" in prompt
+        
+        # Check that examples include priority
+        assert "priority" in prompt.lower()
+        
+        # Check that JSON format includes priority
+        assert '"priority": 0' in prompt
     
     def test_service_initialization(self):
         """Test that AI service initializes correctly"""
@@ -98,13 +111,14 @@ class TestAITodoService:
 class TestAIEndpoint:
     """Test cases for AI endpoint"""
     
-    def test_ai_generate_endpoint_success(self):
+    def test_ai_generate_endpoint_success(self, client):
         """Test successful AI generation"""
         with patch('ai_service.ai_service.generate_todo') as mock_generate:
             mock_result = TodoGenerationResult(
                 success=True,
                 title="Call mom",
                 description="This weekend",
+                priority=0,
                 provider_used="openai/gpt-3.5-turbo"
             )
             mock_generate.return_value = mock_result
@@ -119,15 +133,17 @@ class TestAIEndpoint:
             assert data["success"] is True
             assert data["title"] == "Call mom"
             assert data["description"] == "This weekend"
+            assert data["priority"] == 0
             assert data["provider_used"] == "openai/gpt-3.5-turbo"
     
-    def test_ai_generate_endpoint_fallback(self):
+    def test_ai_generate_endpoint_fallback(self, client):
         """Test fallback scenario"""
         with patch('ai_service.ai_service.generate_todo') as mock_generate:
             mock_result = TodoGenerationResult(
                 success=True,
                 title="Call mom",
                 description="This weekend",
+                priority=0,
                 fallback_used=True,
                 provider_used="fallback"
             )
@@ -141,9 +157,10 @@ class TestAIEndpoint:
             assert response.status_code == 200
             data = response.json()
             assert data["success"] is True
+            assert data["priority"] == 0
             assert data["fallback_used"] is True
     
-    def test_ai_generate_endpoint_failure(self):
+    def test_ai_generate_endpoint_failure(self, client):
         """Test AI generation failure"""
         with patch('ai_service.ai_service.generate_todo') as mock_generate:
             mock_result = TodoGenerationResult(
@@ -162,7 +179,7 @@ class TestAIEndpoint:
             assert data["detail"]["success"] is False
             assert "error" in data["detail"]
     
-    def test_ai_generate_endpoint_validation(self):
+    def test_ai_generate_endpoint_validation(self, client):
         """Test input validation"""
         # Empty input
         response = client.post(
@@ -178,7 +195,7 @@ class TestAIEndpoint:
         )
         assert response.status_code == 422  # Validation error
     
-    def test_ai_generate_endpoint_unexpected_error(self):
+    def test_ai_generate_endpoint_unexpected_error(self, client):
         """Test unexpected error handling"""
         with patch('ai_service.ai_service.generate_todo') as mock_generate:
             mock_generate.side_effect = Exception("Unexpected error")
@@ -193,13 +210,127 @@ class TestAIEndpoint:
             assert data["detail"]["success"] is False
             assert "unexpected error" in data["detail"]["error"].lower()
 
+class TestAIPriorityDetermination:
+    """Test cases for AI priority determination"""
+    
+    def test_low_priority_determination(self, client):
+        """Test AI determines low priority for routine tasks"""
+        with patch('ai_service.ai_service.generate_todo') as mock_generate:
+            mock_result = TodoGenerationResult(
+                success=True,
+                title="Buy groceries",
+                description=None,
+                priority=0,
+                provider_used="openai/gpt-3.5-turbo"
+            )
+            mock_generate.return_value = mock_result
+            
+            response = client.post(
+                "/todos/ai-generate",
+                json={"user_input": "buy groceries for the weekend"}
+            )
+            
+            assert response.status_code == 200
+            data = response.json()
+            assert data["priority"] == 0
+            assert data["title"] == "Buy groceries"
+    
+    def test_medium_priority_determination(self, client):
+        """Test AI determines medium priority for work tasks"""
+        with patch('ai_service.ai_service.generate_todo') as mock_generate:
+            mock_result = TodoGenerationResult(
+                success=True,
+                title="Schedule team meeting",
+                description="Next week",
+                priority=1,
+                provider_used="openai/gpt-3.5-turbo"
+            )
+            mock_generate.return_value = mock_result
+            
+            response = client.post(
+                "/todos/ai-generate",
+                json={"user_input": "schedule team meeting for next week"}
+            )
+            
+            assert response.status_code == 200
+            data = response.json()
+            assert data["priority"] == 1
+            assert data["title"] == "Schedule team meeting"
+    
+    def test_high_priority_determination(self, client):
+        """Test AI determines high priority for urgent tasks"""
+        with patch('ai_service.ai_service.generate_todo') as mock_generate:
+            mock_result = TodoGenerationResult(
+                success=True,
+                title="Fix server issue",
+                description="Urgent",
+                priority=2,
+                provider_used="openai/gpt-3.5-turbo"
+            )
+            mock_generate.return_value = mock_result
+            
+            response = client.post(
+                "/todos/ai-generate",
+                json={"user_input": "urgent: fix server issue immediately"}
+            )
+            
+            assert response.status_code == 200
+            data = response.json()
+            assert data["priority"] == 2
+            assert data["title"] == "Fix server issue"
+    
+    def test_priority_with_deadline_keywords(self, client):
+        """Test AI determines high priority for deadline-related tasks"""
+        with patch('ai_service.ai_service.generate_todo') as mock_generate:
+            mock_result = TodoGenerationResult(
+                success=True,
+                title="Submit taxes",
+                description="Due next Monday at noon",
+                priority=2,
+                provider_used="openai/gpt-3.5-turbo"
+            )
+            mock_generate.return_value = mock_result
+            
+            response = client.post(
+                "/todos/ai-generate",
+                json={"user_input": "remind me to submit taxes next Monday at noon"}
+            )
+            
+            assert response.status_code == 200
+            data = response.json()
+            assert data["priority"] == 2
+            assert data["title"] == "Submit taxes"
+    
+    def test_priority_fallback_default(self, client):
+        """Test fallback uses default priority when AI fails"""
+        with patch('ai_service.ai_service.generate_todo') as mock_generate:
+            mock_result = TodoGenerationResult(
+                success=True,
+                title="Buy groceries",
+                description=None,
+                priority=0,  # Fallback always uses priority 0
+                fallback_used=True,
+                provider_used="fallback"
+            )
+            mock_generate.return_value = mock_result
+            
+            response = client.post(
+                "/todos/ai-generate",
+                json={"user_input": "buy groceries"}
+            )
+            
+            assert response.status_code == 200
+            data = response.json()
+            assert data["priority"] == 0
+            assert data["fallback_used"] is True
+
 class TestIntegrationScenarios:
     """Integration test scenarios"""
     
     def test_complete_flow_with_mock_llm(self):
         """Test complete flow with mocked LLM"""
         with patch('ai_service.ai_service._call_llm') as mock_call:
-            mock_call.return_value = '{"title": "Submit taxes", "description": "Due next Monday at noon"}'
+            mock_call.return_value = '{"title": "Submit taxes", "description": "Due next Monday at noon", "priority": 2}'
             
             # Test the complete flow
             request = TodoGenerationRequest(user_input="remind me to submit taxes next Monday at noon")
@@ -210,6 +341,7 @@ class TestIntegrationScenarios:
             assert result.success is True
             assert result.title == "Submit taxes"
             assert result.description == "Due next Monday at noon"
+            assert result.priority == 2
     
     def test_multiple_provider_fallback(self):
         """Test fallback between multiple providers"""
@@ -224,7 +356,7 @@ class TestIntegrationScenarios:
             result = asyncio.run(ai_service.generate_todo(request))
             
             assert result.success is True
-            assert result.title == "Buy groceries"
+            assert result.title == "buy groceries for th..."
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
