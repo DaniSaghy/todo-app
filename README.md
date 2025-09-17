@@ -119,9 +119,8 @@ The CI pipeline verifies:
 - **Mock Tests**: Always run, test AI logic with mocked responses
 - **Real Tests**: Run with Google API key, test actual AI integration (optional)
 
-See [AI_TESTING_SETUP.md](AI_TESTING_SETUP.md) for detailed AI testing configuration with Google API.
+See [AI_TESTING_SETUP.md](AI_TESTING_SETUP.md) for detailed AI testing configuration.
 
-View test results in the [Actions tab](https://github.com/yourusername/todo-app/actions) of your repository.
 
 ## API Endpoints
 

@@ -19,7 +19,7 @@ interface AIResponse {
   error?: string;
 }
 
-const API_BASE_URL = 'http://localhost:8000';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 export default function AITodoChat({ onSubmit, onCancel }: AITodoChatProps) {
   const [input, setInput] = useState('');
