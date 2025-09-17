@@ -13,8 +13,14 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the backend directory
 COPY backend/ .
 
-# Expose port (Railway will set PORT environment variable)
+# Copy startup script
+COPY start_backend.sh .
+
+# Make startup script executable
+RUN chmod +x start_backend.sh
+
+# Expose port
 EXPOSE 8000
 
 # Start the FastAPI application
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["./start_backend.sh"]
