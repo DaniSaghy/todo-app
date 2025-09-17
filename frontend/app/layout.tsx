@@ -8,9 +8,9 @@ export const metadata = {
   title: 'Agent Todo - AI-Powered Task Management',
   description: 'Transform your productivity with AI-powered task management. Create, organize, and complete tasks using intelligent agents that understand natural language.',
   icons: {
-    icon: '/favicon.svg',
-    shortcut: '/favicon.svg',
-    apple: '/favicon.svg',
+    icon: 'favicon.svg',
+    shortcut: 'favicon.svg',
+    apple: 'favicon.svg',
   },
 };
 
