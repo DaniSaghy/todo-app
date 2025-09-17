@@ -85,7 +85,9 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:3000",  # Next.js default port
-        "https://danisaghy.github.io"  # GitHub Pages
+        "https://danisaghy.github.io",  # GitHub Pages
+        "https://danisaghy.github.io/todo-app",  # GitHub Pages with base path
+        "https://danisaghy.github.io/todo-app/",  # GitHub Pages with trailing slash
     ],
     allow_credentials=True,
     allow_methods=["*"],
