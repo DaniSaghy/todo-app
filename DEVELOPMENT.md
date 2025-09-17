@@ -1,6 +1,8 @@
-# Todo App Development Guide
+# Development Guide
 
-## Quick Start Commands
+Detailed development instructions for the Todo App.
+
+## Quick Start
 
 ### Backend
 ```bash
@@ -25,8 +27,6 @@ docker-compose up --build
 
 ## AI Features Setup
 
-For AI-powered todo generation:
-
 1. Copy environment template:
 ```bash
 cd backend
@@ -45,7 +45,7 @@ OLLAMA_BASE_URL=http://localhost:11434
 
 3. Restart the backend server
 
-See [AI_INTEGRATION.md](AI_INTEGRATION.md) for detailed AI setup instructions.
+See [AI Integration Guide](AI_INTEGRATION.md) for detailed AI setup.
 
 ## Testing Commands
 
@@ -77,13 +77,11 @@ npm run test:watch  # Watch mode
 
 ## Development Notes
 
-- Backend runs on port 8000
-- Frontend runs on port 3000
-- SQLite database file: `backend/todos.db`
-- Test database: `backend/test_todos.db` (auto-created during tests)
-- API docs available at: `http://localhost:8000/docs`
-- Environment variables: Copy `backend/env.example` to `backend/.env`
-
+- **Backend**: Runs on port 8000
+- **Frontend**: Runs on port 3000
+- **Database**: `backend/todos.db` (SQLite)
+- **API Docs**: http://localhost:8000/docs
+- **Environment**: Copy `backend/env.example` to `backend/.env`
 
 ## Key Features
 
@@ -92,3 +90,9 @@ npm run test:watch  # Watch mode
 - **Responsive Design**: Works on desktop and mobile devices
 - **Real-time Updates**: Instant UI updates without page refresh
 - **Comprehensive Testing**: Unit, integration, and AI service tests
+
+## Related
+
+- **[Frontend Guide](frontend/README.md)** - Frontend development
+- **[Backend Guide](backend/README.md)** - Backend development
+- **[AI Integration](AI_INTEGRATION.md)** - AI features setup
